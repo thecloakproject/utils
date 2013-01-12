@@ -43,11 +43,3 @@ func AESDecryptBytes(block cipher.Block, cipherBytes []byte) (plain []byte, err 
 	}
 	return plain, nil
 }
-
-func PadBytes(data []byte, blockSize int) []byte {
-	// Add padding (originally for correctness, now for simplicity)
-	for len(data) % blockSize != 0 {
-		data = append(data, 0x0)
-	}
-	return data
-}
