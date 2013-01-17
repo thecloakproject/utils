@@ -125,6 +125,20 @@ func GetKeyByEmail(keyring openpgp.EntityList, email string) *openpgp.Entity {
 	return nil
 }
 
+func GetKeyByName(keyring openpgp.EntityList, name string) *openpgp.Entity {
+	for _, entity := range keyring {
+		for _, ident := range entity.Identities {
+			if ident.UserId.Name == name {
+				if DEBUG {
+					log.Printf("Found entity for %s: %+v\n", name, entity)
+				}
+				return entity
+			}
+		}
+	}
+	return nil
+}
+
 // GetEntityFrom returns (OpenPGP) Entity values for the specified
 // user's private or public key (from secring.gpg or pubring.gpg,
 // respectively)
