@@ -142,7 +142,7 @@ func GetKeyByName(keyring openpgp.EntityList, name string) *openpgp.Entity {
 // GetEntityFrom returns (OpenPGP) Entity values for the specified
 // user's private or public key (from secring.gpg or pubring.gpg,
 // respectively)
-func GetEntityFrom(email, sourceFile string) (*openpgp.Entity, error) {
+func GetEntityFrom(emailOrName, sourceFile string) (*openpgp.Entity, error) {
 	// Default case: sourceFile == PUBLIC_KEYRING_FILENAME
 	keyType := "public"
 	keyMap := pubkeys
@@ -152,9 +152,9 @@ func GetEntityFrom(email, sourceFile string) (*openpgp.Entity, error) {
 		keyMap = privkeys
 	}
 
-	if key, ok := pubkeys[email]; ok {
+	if key, ok := pubkeys[emailOrName]; ok {
 		if DEBUG {
-			log.Printf("Grabbed cached pubkey for %s\n", email)
+			log.Printf("Grabbed cached pubkey for %s\n", emailOrName)
 		}
 		return key, nil
 	}
@@ -171,13 +171,21 @@ func GetEntityFrom(email, sourceFile string) (*openpgp.Entity, error) {
 			keyType, sourceFile, err)
 	}
 	if DEBUG {
-		log.Printf("Grabbed %s key for %s off disk\n", keyType, email)
+		log.Printf("Grabbed %s key for %s off disk\n", keyType, emailOrName)
 	}
 
-	key := GetKeyByEmail(ring, email)
+	key := GetKeyByEmail(ring, emailOrName)
+	if key == nil {
+		key = GetKeyByName(ring, emailOrName)
+	}
+	if key == nil {
+		e := fmt.Errorf("Couldn't find key for user %s: %v", emailOrName, err)
+		return nil, e
+	}
+
 	// TODO: Is adding to this map this thread safe? Doesn't look
 	// like it. Should it be?
-	keyMap[email] = key
+	keyMap[emailOrName] = key
 	return key, nil
 
 	if sourceFile != PUBLIC_KEYRING_FILENAME && sourceFile != PRIVATE_KEYRING_FILENAME {
