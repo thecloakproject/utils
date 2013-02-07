@@ -5,12 +5,17 @@ package network
 
 import (
 	"fmt"
+	"http/net"
 	"log"
 )
 
-// TCPServerSimple creates a TCP server to listen for remote connections and
+var (
+	DEBUG = false
+)
+
+// TCPServer creates a TCP server to listen for remote connections and
 // pass them to the given handler
-func TCPServerSimple(listenIPandPort string, maxConns int, handler func(net.Conn)) error {
+func TCPServer(listenIPandPort string, maxConns int, handler func(net.Conn)) error {
 	// Create TCP connection listener
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", listenIPandPort)
 	if err != nil {
@@ -75,7 +80,7 @@ func TCPServerSimple(listenIPandPort string, handler func(net.Conn)) error {
 		return fmt.Errorf("Error calling net.ListenTCP: " + err.Error())
 	}
 
-	// 
+	//
 	for {
 		// Accept new connections
 		conn, err := listener.Accept()
