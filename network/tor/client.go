@@ -20,7 +20,9 @@ var (
 )
 
 // NewProxiedRequest does an HTTP request using the given method to
-// remoteAddr, using r as the payload
+// remoteAddr, using r as the payload, over the local Tor
+// connection. Assumes Polipo (Tor proxy) is running on
+// http://localhost:8118.
 func NewProxiedRequest(method, remoteAddr string, r io.Reader) (respBody []byte, err error) {
 	proxyURL, err := url.Parse(PROXY_URL)
 	if err != nil {
