@@ -11,10 +11,7 @@ import (
 // includes non-numbers, or a number that cannot be parsed as a
 // float64, the resulting sum will be 0 and a non-nil error will be
 // returned. Often used to sum values given in JSON-RPC requests.
-func SumEmptyInterfaceSlice(params []interface{}) (float64, error) {
-	var sum float64 = 0.0
-	var err error
-
+func SumEmptyInterfaceSlice(params []interface{}) (sum float64, err error) {
 	// Parse params as a slice of float64s to add
 	for _, n := range params {
 		num, ok := n.(float64)
@@ -26,7 +23,7 @@ func SumEmptyInterfaceSlice(params []interface{}) (float64, error) {
 		err = fmt.Errorf("Couldn't parse params '%+v' as float64s", params)
 		break
 	}
-	return sum, err
+	return
 }
 
 // ErrToEmptyInterface mostly just makes up for the fact that Go
