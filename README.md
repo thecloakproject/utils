@@ -6,4 +6,4 @@ encryption/decryption (GPG, AES, etc).
 
 ## TODO
 
-* [ ] Remove `github.com/elimisteve/fun` as dependency where possible
+- [ ] Remove `github.com/elimisteve/fun` as dependency where possible
