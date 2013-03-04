@@ -1,27 +1,20 @@
 package crypt
 
 import (
-	// "crypto/aes"
 	"crypto/cipher"
 	"fmt"
-	"log"
+	"github.com/thecloakproject/utils"
 )
 
-func AESEncryptBytes(block cipher.Block, data []byte) (cipher []byte, err error) {
+func AESEncryptBytes(block cipher.Block, plain []byte) (cipher []byte, err error) {
 	blockSize := block.BlockSize()
-
-	length := len(data)
-
-	cipherBytes := make([]byte, length)
-	numBlocks := length / blockSize
-	// Add one more if there were bytes left over
-	if length % blockSize != 0 {
-		numBlocks++
-	}
+	plain = utils.PadBytes(plain, blockSize)
+	length := len(plain)
 
 	// Encrypt
+	cipherBytes := make([]byte, length)
 	for i := 0; i < length; i += blockSize {
-		block.Encrypt(cipherBytes[i:i+blockSize], data[i:i+blockSize])
+		block.Encrypt(cipherBytes[i:i+blockSize], plain[i:i+blockSize])
 	}
 
 	return cipherBytes, nil
@@ -30,16 +23,20 @@ func AESEncryptBytes(block cipher.Block, data []byte) (cipher []byte, err error)
 func AESDecryptBytes(block cipher.Block, cipherBytes []byte) (plain []byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
-			log.Printf("Panic from AESDecryptBytes: %v", e)
 			plain = nil
 			err = fmt.Errorf("%v", e)
 		}
 	}()
 
 	blockSize := block.BlockSize()
-	plain = make([]byte, len(cipherBytes))
-	for i := 0; i < len(cipherBytes); i += blockSize {
+	cipherBytes = utils.PadBytes(cipherBytes, blockSize)
+	length := len(cipherBytes)
+
+	// Decrypt
+	plain = make([]byte, length)
+	for i := 0; i < length; i += blockSize {
 		block.Decrypt(plain[i:i+blockSize], cipherBytes[i:i+blockSize])
 	}
-	return plain, nil
+
+	return
 }
