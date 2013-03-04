@@ -6,18 +6,18 @@ import (
 	"github.com/thecloakproject/utils"
 )
 
-func AESEncryptBytes(block cipher.Block, plain []byte) (cipher []byte, err error) {
+func AESEncryptBytes(block cipher.Block, plain []byte) (cipherBytes []byte, err error) {
 	blockSize := block.BlockSize()
 	plain = utils.PadBytes(plain, blockSize)
 	length := len(plain)
 
 	// Encrypt
-	cipherBytes := make([]byte, length)
+	cipherBytes = make([]byte, length)
 	for i := 0; i < length; i += blockSize {
 		block.Encrypt(cipherBytes[i:i+blockSize], plain[i:i+blockSize])
 	}
 
-	return cipherBytes, nil
+	return
 }
 
 func AESDecryptBytes(block cipher.Block, cipherBytes []byte) (plain []byte, err error) {
