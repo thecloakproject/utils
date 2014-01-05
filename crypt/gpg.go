@@ -8,7 +8,6 @@ import (
 	"code.google.com/p/go.crypto/openpgp"
 	"code.google.com/p/go.crypto/openpgp/armor"
 	"fmt"
-	"github.com/elimisteve/fun"
 	"io"
 	"io/ioutil"
 	"log"
@@ -55,19 +54,22 @@ func EncryptMessage(mw io.Writer, sender, recipient, msg string) error {
 
 	// Produce new writer to... write encrypted messages to?
 	w, err := armor.Encode(mw, "PGP MESSAGE", nil)
-	fun.MaybeFatalAt("Encode", err)
+	if err != nil {
+		return fmt.Errorf("Error from armor.Encode: %v", err)
+	}
 	defer w.Close()
 
 	// Encrypt message from ME to recipient
 	plaintext, err := openpgp.Encrypt(w, []*openpgp.Entity{theirPublicKey},
 		myPrivateKey, nil, nil)
-	fun.MaybeFatalAt("Encrypt", err)
+	if err != nil {
+		return fmt.Errorf("Error from openpgp.Encrypt: %v", err)
+	}
 	defer plaintext.Close()
 
 	// Write message to `plaintext` WriteCloser
-	fmt.Fprintf(plaintext, msg)
-
-	return nil
+	_, err = fmt.Fprintf(plaintext, msg)
+	return err
 }
 
 // DecryptMessage is largely from
