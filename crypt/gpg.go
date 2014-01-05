@@ -74,13 +74,13 @@ func EncryptMessage(mw io.Writer, sender, recipient, msg string) error {
 
 // DecryptMessage is largely from
 // http://chiselapp.com/user/loser/repository/auricular/artifact/e14b57f441816f449105d201e7fb429f76907c65
-func DecryptMessage(recipient, cipher string) (string, error) {
+func DecryptMessage(recipient, cipher string) (fromId uint64, msg string, err error) {
 	// if DEBUG { log.Printf("Within decryptMessage: cipher == %v\n", cipher) }
 	r := bytes.NewBufferString(cipher)
 	// r := strings.NewReader(cipher)
 	block, err := armor.Decode(r)
 	if err != nil {
-		return "", fmt.Errorf("Error decrypting message: %v", err)
+		return 0, "", fmt.Errorf("Error decrypting message: %v", err)
 	}
 
 	if DEBUG {
@@ -88,7 +88,7 @@ func DecryptMessage(recipient, cipher string) (string, error) {
 	}
 	myPrivateKey, err := GetEntityFrom(recipient, PRIVATE_KEYRING_FILENAME)
 	if err != nil {
-		return "", fmt.Errorf("Error getting private key for %s: %v",
+		return 0, "", fmt.Errorf("Error getting private key for %s: %v",
 			recipient, err)
 	}
 	entities := openpgp.EntityList([]*openpgp.Entity{myPrivateKey})
@@ -97,7 +97,7 @@ func DecryptMessage(recipient, cipher string) (string, error) {
 	}
 	details, err := openpgp.ReadMessage(block.Body, entities, nil, nil)
 	if err != nil {
-		return "", fmt.Errorf("Error reading message block body: %v", err)
+		return 0, "", fmt.Errorf("Error reading message block body: %v", err)
 	}
 
 	// Read the message body
@@ -106,10 +106,10 @@ func DecryptMessage(recipient, cipher string) (string, error) {
 	}
 	raw, err := ioutil.ReadAll(details.UnverifiedBody)
 	if err != nil {
-		return "", fmt.Errorf("Error reading decrypted message body: %v", err)
+		return 0, "", fmt.Errorf("Error reading decrypted message body: %v",
+			err)
 	}
-
-	return string(raw), nil
+	return details.SignedByKeyId, string(raw), nil
 }
 
 // GetKeyByEmail is from http://www.imperialviolet.org/2011/06/12/goopenpgp.html
